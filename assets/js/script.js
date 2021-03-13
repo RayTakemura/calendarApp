@@ -34,7 +34,8 @@ function populateTasks() {
             .text("You can do anything here. So don't worry about it. Be so very light. Be a gentle whisper. Maybe, just to play a little, we'll put a little tree here. Let's do it again then, what the heck. I want everbody to be happy. That's what it's all about.");
 
         let $saveBtn = $('<button>')
-            .addClass('col-1 rounded-right saveBtn'); 
+            .addClass('col-1 rounded-right saveBtn')
+            .attr('id-btn-', START + i); 
         let $span = $('<span>')
             .addClass('oi oi-lock-locked');
         $saveBtn.append($span);
@@ -44,18 +45,19 @@ function populateTasks() {
     }
 }
 
-populateTasks();
-// the 'on-click' function for saving tasks
+
 
 // the 'on-click' function for editting tasks
+
+// the 'on-click' function for saving tasks
+
 
 // compareTime function to set color of each schedule
     //check taskmaster-pro for details
 
 
 
-
-
+populateTasks();
 
 
 
