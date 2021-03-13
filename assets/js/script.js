@@ -26,11 +26,11 @@ function populateTasks() {
         let timeText = time.format('h A');
         let $timePrint = $('<span>')
             .addClass('col-1 border-top')
-            .attr('id-text-', START + i)
             .text(timeText);
 
         let $taskP = $('<p>')
             .addClass('col-10 border border-light m-0 pt-2')
+            .attr('id-text-', START + i)
             .text("You can do anything here. So don't worry about it. Be so very light. Be a gentle whisper. Maybe, just to play a little, we'll put a little tree here. Let's do it again then, what the heck. I want everbody to be happy. That's what it's all about.");
 
         let $saveBtn = $('<button>')
@@ -46,10 +46,52 @@ function populateTasks() {
 }
 
 
-
-// the 'on-click' function for editting tasks
+/**
+ * Convert the p element to textarea element.
+ */
+$('.container').on('click', 'p', function() {
+    let textP = $(this).text();
+    let pClass = $(this).attr('class');
+    let textID = $(this).attr('id-text-');
+    let $textInput = $('<textarea>')
+        .addClass(pClass)
+        .attr('id-text-', textID)
+        .val(textP);
+    $(this).replaceWith($textInput);
+    $textInput.trigger('focus');
+});
 
 // the 'on-click' function for saving tasks
+$('.container').on('click', 'button', function() {
+    let idNum = $(this).attr('id-btn-');
+    console.log(idNum);
+    let $textArea = $('textarea').data('id-text-', idNum);
+    console.log($textArea.val());
+    let text = $textArea
+        .val()
+        .trim();
+
+    let pClass = $textArea.attr('class');
+    
+    let $taskP = $('<p>')
+        .addClass(pClass)
+        .text(text);
+
+    $($textArea).replaceWith($taskP)
+})
+
+// // on blur, change the textarea to p
+// $('.container').on('blur', 'textarea', function() {
+//     let $text = $(this)
+//         .val()
+//         .trim();
+    
+//     let $taskP = $('<p>')
+//         .addClass('')
+//         .text($text);
+
+//     $(this).replaceWith($taskP)
+// })
 
 
 // compareTime function to set color of each schedule
