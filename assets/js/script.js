@@ -1,15 +1,15 @@
 //global vars
-let list = [];// an array to store localStorage vars
+var tasks = {
+    id: [],
+    task: []
+};// an array to store localStorage vars
 const START = 9; // const of the time to start in military hour
 const END = 17;// const of the time to end in military hour
 
-// Elements needed for each cell:
-// span, input (textarea), and save button
-
-// vars needed for each cell:
-    //moment object for each hour 
-
-// using above, create a function: populateSchedules
+/**
+ * Populates tasks on to the container.
+ * Each task contains time in hour, schedule for the hour, and a save button
+ */
 function populateTasks() {
     // for loop or "for each"
     for(var i = 0; i < (END - START + 1); i++){
@@ -17,22 +17,25 @@ function populateTasks() {
         let $row = $('<div>')
             .addClass('row')
             .attr('id-',START + i);
-        // each row needs 3 columns: col-1, col-10, col-1 
+        // create time for work hour
         let time = moment().set({
             'hour' : i + START,
             'minute' : 0,
             'second' : 0
         });
+        //convert time into proper format and make a span element
         let timeText = time.format('h A');
         let $timePrint = $('<span>')
             .addClass('col-1 border-top')
             .text(timeText);
 
+        //create p element that holds the text for schedule
         let $taskP = $('<p>')
             .addClass('col-10 border border-light m-0 pt-2')
-            .attr('id-text-', START + i)
-            .text("You can do anything here. So don't worry about it. Be so very light. Be a gentle whisper. Maybe, just to play a little, we'll put a little tree here. Let's do it again then, what the heck. I want everbody to be happy. That's what it's all about.");
+            .attr('id-p-', START + i);
+            //.text("You can do anything here. So don't worry about it. Be so very light. Be a gentle whisper. Maybe, just to play a little, we'll put a little tree here. Let's do it again then, what the heck. I want everbody to be happy. That's what it's all about.");
 
+        // create the save button with the lock icon
         let $saveBtn = $('<button>')
             .addClass('col-1 rounded-right saveBtn')
             .attr('id-btn-', START + i); 
@@ -40,7 +43,10 @@ function populateTasks() {
             .addClass('oi oi-lock-locked');
         $saveBtn.append($span);
 
+        //append every column into the row
         $row.append($timePrint, $taskP, $saveBtn);
+
+        //append row to container
         $('.container').append($row);
     }
 }
@@ -50,9 +56,11 @@ function populateTasks() {
  * Convert the p element to textarea element.
  */
 $('.container').on('click', 'p', function() {
+    //take the text content, the class, and the data attribute from p element
     let textP = $(this).text();
     let pClass = $(this).attr('class');
-    let textID = $(this).attr('id-text-');
+    let textID = $(this).attr('id-p-');
+    //replace p element with textarea element. They have the same class, attribute, and text
     let $textInput = $('<textarea>')
         .addClass(pClass)
         .attr('id-text-', textID)
@@ -61,37 +69,65 @@ $('.container').on('click', 'p', function() {
     $textInput.trigger('focus');
 });
 
-// the 'on-click' function for saving tasks
+/**
+ * Save the updated schedule to local storage.
+ * Convert textarea element back to p.
+ */
 $('.container').on('click', 'button', function() {
+    // check if the textarea exists
     let idNum = $(this).attr('id-btn-');
-    console.log(idNum);
     let $textArea = $('textarea').data('id-text-', idNum);
-    console.log($textArea.val());
+    if($textArea) return;
+    // let $p = $('p').data('id-p-', idNum);
+    // if($p) return;
+    
+    // obtain data attr, class, and text from textarea
+    let pClass = $textArea.attr('class');
     let text = $textArea
         .val()
         .trim();
-
-    let pClass = $textArea.attr('class');
     
+    // convert textarea to p element
     let $taskP = $('<p>')
+        .attr('id-p-', idNum)
         .addClass(pClass)
         .text(text);
-
     $($textArea).replaceWith($taskP)
+
+    // save the task and the id
+    tasks.id.push(idNum);
+    tasks.task.push(text);
+    
+    // store the saved task to the local storage
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+
 })
 
-// // on blur, change the textarea to p
-// $('.container').on('blur', 'textarea', function() {
-//     let $text = $(this)
-//         .val()
-//         .trim();
-    
-//     let $taskP = $('<p>')
-//         .addClass('')
-//         .text($text);
+// load the tasks
+function loadTasks(){
 
-//     $(this).replaceWith($taskP)
-// })
+    populateTasks();
+
+    tasks = JSON.parse(localStorage.getItem('tasks'));
+
+    if (!tasks) {
+        tasks = {
+            id: [],
+            task: []
+        };
+    }
+
+    console.log(tasks.id.length);
+
+    for (var i = 0; i < tasks.id.length; i++) {
+        $taskP = $('p').data('id-text-', tasks.id[i]);
+        //console.log($taskP.val());
+        console.log(tasks.task[i]);
+        $taskP.text(tasks.task[i]);
+        //$taskP.addClass('col-12');
+    }
+
+}
 
 
 // compareTime function to set color of each schedule
@@ -99,7 +135,7 @@ $('.container').on('click', 'button', function() {
 
 
 
-populateTasks();
+loadTasks();
 
 
 
