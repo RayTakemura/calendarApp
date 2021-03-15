@@ -1,7 +1,8 @@
 //global vars
 var tasks = {};
 const START = 9; // const of the time to start in military hour
-const END = 17;// const of the time to end in military hour
+const END = 23;// const of the time to end in military hour
+const AUDIT_RATE = 5; // audit refresh rate in sec
 
 /**
  * Populates tasks on to the container.
@@ -26,11 +27,12 @@ function createTask(index, task) {
 
     //create p element that holds the text for schedule
     var $taskP = $('<p>')
-        .addClass('col-10 border border-light m-0 pt-2')
         .attr('id-p-', index);
     if(task){
         $taskP.text(task);
     }
+    var hour = parseInt(time.format('H'));
+    auditTask(hour, $taskP);
 
     // create the save button with the lock icon
     let $saveBtn = $('<button>')
@@ -45,9 +47,36 @@ function createTask(index, task) {
 
     //append row to container
     $('.container').append($row);
-    console.log($row);
+    //console.log($row);
 };
 
+
+function auditTask(hour, $taskP) {
+    var now = parseInt(moment().format('H'));
+    if(now === hour){
+        $taskP = $taskP
+            .addClass('col-10 border border-light m-0 pt-2 alert alert-danger')
+            .attr('role','alert');
+    } else if (now > hour){
+        $taskP = $taskP
+            .addClass('col-10 border border-light m-0 pt-2 alert alert-secondary')
+            .attr('role','alert');
+    } else {
+        $taskP = $taskP
+            .addClass('col-10 border border-light m-0 pt-2 alert alert-success')
+            .attr('role','alert');
+    }
+}
+
+
+setInterval(function() {
+    $rows = $(document.querySelectorAll('.row'));
+    $rows.each(function(){
+        var $taskP = $(this).find('p');
+        var hour = $taskP.attr('id-p-');
+        auditTask(hour, $taskP)
+    });
+}, AUDIT_RATE * 1000);
 
 /**
  * Convert the p element to textarea element.
@@ -75,13 +104,13 @@ $('.container').on('click', 'button', function() {
 //$('button').click( function() {    
     // check if the textarea exists
     let idNum = $(this).attr('id-btn-');
-    console.log(idNum);
+    //console.log(idNum);
     let $textArea = $(this).prev();
-    console.log($textArea.attr('id-text-'));
+    //console.log($textArea.attr('id-text-'));
     
     // obtain data attr, class, and text from textarea
     let pClass = $textArea.attr('class');
-    console.log($textArea.val())
+    //console.log($textArea.val())
     let text = $textArea
         .val()
         .trim();
@@ -128,12 +157,9 @@ function loadTasks(){
           task: []
         };
     }
-    console.log(tasks);
     var j = 0;
     for (var i = START; i < END + 1; i++) {
         for (j = 0; j < tasks.id.length; j++){
-            console.log(parseInt(tasks.id[j]));
-            console.log(tasks.task[j]);
             if(parseInt(tasks.id[j]) === i){
                 createTask(i,tasks.task[j]);
                 break; //breaks out of the inner for loop (the one with j variable)
@@ -147,10 +173,6 @@ function loadTasks(){
         }
     }
 };
-
-
-// compareTime function to set color of each schedule
-    //check taskmaster-pro for details
 
 
 loadTasks();
