@@ -1,8 +1,8 @@
 //global vars
 var tasks = {};
 const START = 9; // const of the time to start in military hour
-const END = 23;// const of the time to end in military hour
-const AUDIT_RATE = 5; // audit refresh rate in sec
+const END = 17;// const of the time to end in military hour
+const AUDIT_RATE = 20; // audit refresh rate in sec
 
 /**
  * Populates tasks on to the container.
@@ -26,12 +26,13 @@ function createTask(index, task) {
         .text(timeText);
 
     //create p element that holds the text for schedule
-    var $taskP = $('<p>')
-        .attr('id-p-', index);
+    let $taskP = $('<p>')
+        .attr('id-p-', index)
+        .addClass('col-10 border border-light m-0 pt-2');
     if(task){
         $taskP.text(task);
     }
-    var hour = parseInt(time.format('H'));
+    let hour = parseInt(time.format('H'));
     auditTask(hour, $taskP);
 
     // create the save button with the lock icon
@@ -47,33 +48,49 @@ function createTask(index, task) {
 
     //append row to container
     $('.container').append($row);
-    //console.log($row);
 };
 
+/**
+ * Presents the present day as the p element in the header.
+ * The date is in the form of weekday, Month day of month
+ */
+function presentDay(){
+    let date = moment().format('dddd, MMMM Do');
+    let $today = $(document.querySelector('#currentDay'));
+    $today = $today.text(date);
+};
 
+/**
+ * Audits task by color coding present, past, and future.
+ * @param {int} hour The hour of the schedule
+ * @param {jQuery} $taskP The jQuery DOM object that holds the p element in each row.
+ */
 function auditTask(hour, $taskP) {
-    var now = parseInt(moment().format('H'));
+    let now = parseInt(moment().format('H'));
+    $taskP.removeClass();
     if(now === hour){
         $taskP = $taskP
-            .addClass('col-10 border border-light m-0 pt-2 alert alert-danger')
-            .attr('role','alert');
+            .addClass('col-10 border border-light m-0 pt-2 alert alert-danger');
+            
     } else if (now > hour){
         $taskP = $taskP
-            .addClass('col-10 border border-light m-0 pt-2 alert alert-secondary')
-            .attr('role','alert');
+            .addClass('col-10 border border-light m-0 pt-2 alert alert-secondary');
+            
     } else {
         $taskP = $taskP
-            .addClass('col-10 border border-light m-0 pt-2 alert alert-success')
-            .attr('role','alert');
+            .addClass('col-10 border border-light m-0 pt-2 alert alert-success');
     }
-}
+};
 
-
+/**
+ * Updates the color of task.
+ * The rate at which it updates is determined by AUDIT_RATE value.
+ */
 setInterval(function() {
     $rows = $(document.querySelectorAll('.row'));
     $rows.each(function(){
-        var $taskP = $(this).find('p');
-        var hour = $taskP.attr('id-p-');
+        let $taskP = $(this).find('p');
+        let hour = parseInt($taskP.attr('id-p-'));
         auditTask(hour, $taskP)
     });
 }, AUDIT_RATE * 1000);
@@ -100,24 +117,22 @@ $('.container').on('click', 'p', function() {
  * Save the updated schedule to local storage.
  * Convert textarea element back to p.
  */
-$('.container').on('click', 'button', function() {
-//$('button').click( function() {    
+$('.container').on('click', 'button', function() { 
     // check if the textarea exists
     let idNum = $(this).attr('id-btn-');
-    //console.log(idNum);
     let $textArea = $(this).prev();
-    //console.log($textArea.attr('id-text-'));
     
     // obtain data attr, class, and text from textarea
     let pClass = $textArea.attr('class');
-    //console.log($textArea.val())
     let text = $textArea
         .val()
         .trim();
     
+    // Exit the function if there is no text
     if(!text || text === ""){
         return;
     }
+
     // convert textarea to p element
     let $taskP = $('<p>')
         .attr('id-p-', idNum)
@@ -126,7 +141,7 @@ $('.container').on('click', 'button', function() {
     
     $($textArea).replaceWith($taskP);
 
-    // save the task and the id
+    // save the task and the id to the global array
     if(tasks.id.length > 0){
         for (var i = 0; i < tasks.id.length; i++){
             if(idNum === tasks.id[i]){
@@ -143,13 +158,15 @@ $('.container').on('click', 'button', function() {
         tasks.task.push(text);
     }
     
-    
     // store the saved task to the local storage
     localStorage.setItem('tasks', JSON.stringify(tasks));
 });
 
-// load the tasks
+/**
+ * Load tasks by repeatedly creating task.
+ */
 function loadTasks(){
+    //obtain array from localStorage, create one if it doesn't exist.
     tasks = JSON.parse(localStorage.getItem('tasks'));
     if (!tasks) {
         tasks = {
@@ -157,9 +174,10 @@ function loadTasks(){
           task: []
         };
     }
-    var j = 0;
+    
+    //create rows of task.
     for (var i = START; i < END + 1; i++) {
-        for (j = 0; j < tasks.id.length; j++){
+        for (var j = 0; j < tasks.id.length; j++){
             if(parseInt(tasks.id[j]) === i){
                 createTask(i,tasks.task[j]);
                 break; //breaks out of the inner for loop (the one with j variable)
@@ -174,6 +192,6 @@ function loadTasks(){
     }
 };
 
-
+presentDay();
 loadTasks();
 
