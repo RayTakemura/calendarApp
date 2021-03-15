@@ -86,27 +86,32 @@ $('.container').on('click', 'button', function() {
         .val()
         .trim();
     
+    if(!text || text === ""){
+        return;
+    }
     // convert textarea to p element
     let $taskP = $('<p>')
         .attr('id-p-', idNum)
         .addClass(pClass)
         .text(text);
+    
     $($textArea).replaceWith($taskP);
 
     // save the task and the id
     if(tasks.id.length > 0){
         for (var i = 0; i < tasks.id.length; i++){
-            if(idNum === parseInt(tasks.id[i])){
+            if(idNum === tasks.id[i]){
                 tasks.task.splice(i, 1, text);
                 break;
             } else if(i === tasks.id.length - 1 ){
                 tasks.id.push(idNum);
                 tasks.task.push(text);
+                break;
             } 
         }
     } else{
         tasks.id.push(idNum);
-                tasks.task.push(text);
+        tasks.task.push(text);
     }
     
     
